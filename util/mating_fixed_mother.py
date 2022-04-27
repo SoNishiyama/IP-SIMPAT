@@ -1,24 +1,42 @@
 #!/usr/bin/env python3
 #  2021/01/22 SN
 
-# usage: python this.py genmat.tsv mother-id father-id-list.txt marker-list num-progeny output_prefix
+# Simulated crossing between a maternal individual and paternal individuals.
+# Output genotype matrix for the specified markers
 
-import sys
+# 22/04/22 add -m option -m: frequency of masking operation. float value between 0-1, default 0. Converting genotype
+# data into missing genotype in a defined frequency. This would be used to test the robustness for missing genotype.
+
+# usage: python this.py genmat.tsv mother-id father-id-list.txt marker-list num-progeny output_prefix [-m float]
+
 import Cervus_prep_util as Cp
+import argparse
+import random
 
-
-def output(geno):
+def output(geno,m):
     out = []
     for gen in geno:
         if gen == 0:
-            out.append("1")
-            out.append("1")
+            if m < random.random():
+                out.append("1")
+                out.append("1")
+            else:
+                out.append("0")
+                out.append("0")
         elif gen == 1:
-            out.append("1")
-            out.append("2")
+            if m < random.random():
+                out.append("1")
+                out.append("2")
+            else:
+                out.append("0")
+                out.append("0")
         elif gen == 2:
-            out.append("2")
-            out.append("2")
+            if m < random.random():
+                out.append("2")
+                out.append("2")
+            else:
+                out.append("0")
+                out.append("0")
         elif gen == 9:
             out.append("0")
             out.append("0")
@@ -26,17 +44,26 @@ def output(geno):
 
 
 def main():
-    genmat = open(sys.argv[1])
-    mother = sys.argv[2]
-    father = open(sys.argv[3])
-    marlist = open(sys.argv[4])
-    num_prog = int(sys.argv[5])
-    out_gen = open(sys.argv[6] + ".cervus.gen.txt", 'w')
-    out_prg = open(sys.argv[6] + ".offspring.txt", 'w')
-    out_tru = open(sys.argv[6] + ".truecross.txt", 'w')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("gen", help="input genotype matrix", type=str)
+    parser.add_argument("mother", help="mother ID", type=str)
+    parser.add_argument("f", help="list of father ID", type=str)
+    parser.add_argument("mar", help="input marker list", type=str)
+    parser.add_argument("num_ofs", help="number of offspring per cross", type=int)
+    parser.add_argument("out", help="output prefix", type=str)
+    parser.add_argument("-m", "--missing", dest="m", type=float, default=0,
+                        help="Frequency of masking operation")
+    args = parser.parse_args()
+
+    genmat = open(args.gen)
+    marlist = open(args.mar)
+    father = open(args.f)
+    out_gen = open(args.out + ".cervus.gen.txt", 'w')
+    out_prg = open(args.out + ".offspring.txt", 'w')
+    out_tru = open(args.out + ".truecross.txt", 'w')
 
     indlist = set()
-    indlist.add(mother)
+    indlist.add(args.mother)
     patlist = []
     for i in father:
         indlist.add(i.rstrip())
@@ -59,20 +86,20 @@ def main():
         out = []
         for j in range(len(mar)):
             out.append(d[i][mar[j]])
-        out_gen.write(indv[i]+"\t"+"\t".join(output(out))+"\n")
+        out_gen.write(indv[i]+"\t"+"\t".join(output(out,0))+"\n")
 
     mating = Cp.Mating(d, indv)
 
     # outputting progeny data
     c = 1
     for i in range(len(patlist)):
-        for j in range(num_prog):
-            prog = mating.mating(mother, patlist[i], mar)
-            out = output(prog)
+        for j in range(args.num_ofs):
+            prog = mating.mating(args.mother, patlist[i], mar)
+            out = output(prog,args.m)
             prog_name = "OFS"+str(c)
             out_gen.write(prog_name+"\t"+"\t".join(out)+"\n")
-            out_prg.write(prog_name+"\t"+mother+"\t"+"\t".join(patlist)+"\n")
-            out_tru.write(prog_name+"\t"+mother+"\t"+patlist[i]+"\n")
+            out_prg.write(prog_name+"\t"+args.mother+"\t"+"\t".join(patlist)+"\n")
+            out_tru.write(prog_name+"\t"+args.mother+"\t"+patlist[i]+"\n")
             c += 1
 
 
