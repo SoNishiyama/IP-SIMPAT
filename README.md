@@ -13,10 +13,10 @@ Under these assumptions, IP-SIMPAT selects small number of markers that could di
 ### Overview
 `IP-SIMPAT-main/` containts all the MATLAB implementation for the proposed optimization method. `util/` contains several scripts 
 that would be used for input preparation and genotype simulation. `test-data/` contains test data that is adoption of valuable apple genotype data by [Muranty et al. 2020](https://doi.org/10.1186/s12870-019-2171-6) 
-with some process presented in [Nishiyama et al. 2021](https://github.com/SoNishiyama/IP-MARS), and could be used for optimization test.
+with some process presented in [Nishiyama et al. 2021](https://doi.org/10.1186/s12859-022-04801-z), and could be used for optimization test.
 
 ## Citation
-XXX XXX
+Nishiyama, S., Sato, K. & Tao, R. (2022) Integer programming for selecting set of informative markers in paternity inference. BMC Bioinformatics 23, 265. https://doi.org/10.1186/s12859-022-04801-z
 
 ## Step-by-step tutorial
 Here we are going to find an optimized marker set to identify a paternal parent of offspring whose maternal parent is an apple cultivar 'Fuji'. The test data `Fuji-small` includes genotype data 
